@@ -45,6 +45,11 @@ from ..core import util
 
 
 class MOL2Reader(base.Reader):
+    """Reader for MOL2 structure format.
+
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
+    """
     format = 'MOL2'
     units = {'time': None, 'length': 'Angstrom'}
 
@@ -57,13 +62,6 @@ class MOL2Reader(base.Reader):
         if convert_units is None:
             convert_units = core.flags['convert_lengths']
         self.convert_units = convert_units  # convert length and time to base units
-
-        # = NOTE to clear up confusion over 0-based vs 1-based frame numbering =
-        # self.frame is 1-based for this Reader, which matches the behavior of
-        # the MODEL record in a typical multi-model PDB file.  If the MODEL
-        # record is 0-based, this is accounted for by __init__.
-        # self._read_frame assumes that it is passed a 0-based frame number, so
-        # that it functions as expected when slicing is used.
 
         blocks = []
 
@@ -80,7 +78,7 @@ class MOL2Reader(base.Reader):
 
         self.numatoms = len(coords)
         self.ts = self._Timestep.from_coordinates(np.array(coords, dtype=np.float32))
-        self.ts.frame = 1  # 1-based frame number as starting frame
+        self.ts.frame = 0  # 0-based frame number as starting frame
 
         if self.convert_units:
             self.convert_pos_from_native(self.ts._pos)  # in-place !
@@ -130,9 +128,6 @@ class MOL2Reader(base.Reader):
         else:
             # TODO: cleanup _read_frame() to use a "free" Timestep
             raise NotImplementedError("PrimitiveMOL2Reader cannot assign to a timestep")
-        # frame is 1-based. Normally would add 1 to frame before calling
-        # self._read_frame to retrieve the subsequent ts. But self._read_frame
-        # assumes it is being passed a 0-based frame, and adjusts.
         frame = self.frame
         return self._read_frame(frame)
 
@@ -229,6 +224,9 @@ class MOL2Writer(base.Writer):
               12  6   12  1 
              @<TRIPOS>SUBSTRUCTURE 
               1   BENZENE 1   PERM    0   ****    ****    0   ROOT
+
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
 
     """
     format = 'MOL2'
@@ -330,10 +328,10 @@ class MOL2Writer(base.Writer):
         traj = obj.universe.trajectory
 
         # Start from trajectory[0]/frame 1, if there are more than 1 frame.
-        # If there is onyl 1 frame, the traj.frames is not like a python list:
+        # If there is only 1 frame, the traj.frames is not like a python list:
         # accessing trajectory[-1] raises key error.
         if not start and traj.numframes > 1:
-            start = traj.frame - 1
+            start = traj.frame
 
         for framenumber in xrange(start, len(traj), step):
             traj[framenumber]

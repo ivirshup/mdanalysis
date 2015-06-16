@@ -83,8 +83,9 @@ class XYZWriter(base.Writer):
     """Writes an XYZ file
 
     The XYZ file format is not formally defined. This writer follows
-    the implement
-    http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/xyzplugin.html .
+    the vmd implementation. See:
+
+    http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/xyzplugin.html
     """
 
     format = 'XYZ'
@@ -233,6 +234,8 @@ class XYZReader(base.Reader):
     exact agreement (measured to 3DP). bzipped and gzipped versions of
     the XYZ file were also tested
 
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
     """
 
     # this will be overidden when an instance is created and the file extension checked
@@ -368,7 +371,7 @@ class XYZReader(base.Reader):
         # reset ts
         ts = self.ts
         ts.status = 1
-        ts.frame = 0
+        ts.frame = -1
         ts.step = 0
         ts.time = 0
         return self.xyzfile

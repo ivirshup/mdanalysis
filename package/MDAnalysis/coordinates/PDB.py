@@ -22,7 +22,7 @@ PDB structure files in MDAnalysis --- :mod:`MDAnalysis.coordinates.PDB`
 MDAnalysis reads coordinates from PDB files and additional optional
 data such as B-factors. It is also possible to substitute a PDB file
 instead of PSF file in order to define the list of atoms (but no
-connectivity information will be  available in this case).
+connectivity information will be available in this case).
 
 PDB files contain both coordinate and atom information. It is also possible to
 write trajectories as multi-frame (or multi-model) PDB files. This is not very
@@ -236,6 +236,9 @@ class PDBReader(base.SingleFrameReader):
 
     .. Note:: The Biopython.PDB reader does not parse the ``CRYST1``
               record and hence the unitcell dimensions are not set.
+
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
     """
     format = 'PDB'
     units = {'time': None, 'length': 'Angstrom'}
@@ -248,7 +251,7 @@ class PDBReader(base.SingleFrameReader):
         self.fixed = 0  # parse B field for fixed atoms?
         #self.ts._unitcell[:] = ??? , from CRYST1? --- not implemented in Biopython.PDB
         self.ts = self._Timestep.from_coordinates(pos)
-        self.ts.frame = 1
+        self.ts.frame = 0
         del pos
         if self.convert_units:
             self.convert_pos_from_native(self.ts._pos)  # in-place !
@@ -424,6 +427,9 @@ class PrimitivePDBReader(base.Reader):
 
     .. SeeAlso:: :class:`PrimitivePDBWriter`
 
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
+
     """
     format = 'PDB'
     units = {'time': None, 'length': 'Angstrom'}
@@ -448,15 +454,6 @@ class PrimitivePDBReader(base.Reader):
         except KeyError:
             raise ValueError("PrimitivePDBReader requires the numatoms keyword")
 
-        # = NOTE to clear up confusion over 0-based vs 1-based frame numbering =
-        # self.frame is 1-based for this Reader, which matches the behavior of
-        # the MODEL record in a typical multi-model PDB file.  If the MODEL
-        # record is 0-based, this is accounted for by __init__.
-        # self._read_frame assumes that it is passed a 0-based frame number, so
-        # that it functions as expected when slicing is used.
-
-        # If MODEL number in the PDB file is 0-based, then this model_offset
-        # will be set to 1 by __init__.
         self.model_offset = kwargs.pop("model_offset", 0)
 
         header = ""
@@ -494,7 +491,7 @@ class PrimitivePDBReader(base.Reader):
                     content = line[6:-1]
                     remarks.append(content)
                 elif record == 'MODEL':
-                    frames[len(frames) + 1] = i  # 1-based indexing
+                    frames[len(frames)] = i  # 0-based indexing
                 elif line[:6] in ('ATOM  ', 'HETATM'):
                     # skip atom/hetatm for frames other than the first
                     # they will be read in when next() is called
@@ -516,7 +513,7 @@ class PrimitivePDBReader(base.Reader):
                              "".format(expected=self._numatoms, actual=pos))
         self.numatoms = pos
 
-        self.ts.frame = 1  # 1-based frame number as starting frame
+        self.ts.frame = 0  # 0-based frame number as starting frame
 
         if self.convert_units:
             self.convert_pos_from_native(self.ts._pos)  # in-place !
@@ -653,6 +650,8 @@ class PrimitivePDBWriter(base.Writer):
        of bond information (CONECT_ records) is now disabled by default but can be
        enabled with the *bonds* keyword.
 
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
     """
     #          1         2         3         4         5         6         7         8
     # 123456789.123456789.123456789.123456789.123456789.123456789.123456789.123456789.
@@ -984,6 +983,9 @@ class PrimitivePDBWriter(base.Writer):
            pdb.write_all_timesteps(u)
 
         will be writing frames 12, 14, 16, ...
+
+        .. versionchanged:: 0.11.0
+           Frames now 0-based instead of 1-based
         """
 
         self._update_frame(obj)
@@ -992,11 +994,11 @@ class PrimitivePDBWriter(base.Writer):
         start, step = self.start, self.step
         traj = self.trajectory
 
-        # Start from trajectory[0]/frame 1, if there are more than 1 frame.
-        # If there is onyl 1 frame, the traj.frames is not like a python list:
+        # Start from trajectory[0]/frame 0, if there are more than 1 frame.
+        # If there is only 1 frame, the traj.frames is not like a python list:
         # accessing trajectory[-1] raises key error.
         if not start and traj.numframes > 1:
-            start = traj.frame - 1
+            start = traj.frame
 
         for framenumber in xrange(start, len(traj), step):
             traj[framenumber]

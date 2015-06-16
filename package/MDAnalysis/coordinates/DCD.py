@@ -19,7 +19,7 @@
 ============================================================
 
 Classes to read and write DCD binary trajectories, the format used by
-CHARMM, NAMD but also LAMMPS. Trajectories can be read regardless of
+CHARMM, NAMD, and also LAMMPS. Trajectories can be read regardless of
 system-endianness as this is auto-detected.
 
 Generally, DCD trajectories produced by any code can be read (with the

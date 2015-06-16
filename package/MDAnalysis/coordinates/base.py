@@ -88,7 +88,10 @@ module. The derived classes must follow the Trajectory API in
 
    .. attribute::`frame`
 
-      frame number
+      frame number (0-based)
+
+      .. versionchanged:: 0.11.0
+         Frames now 0-based; was 1-based
 
 .. autoclass:: IObase
    :members:
@@ -671,7 +674,7 @@ class Reader(IObase):
         .. SeeAlso:: :meth:`Reader.Writer` and :func:`MDAnalysis.Writer`
         """
         kwargs['numatoms'] = self.numatoms  # essential
-        kwargs.setdefault('start', self.frame - 1)  # -1 should be correct... [orbeckst] ?!?
+        kwargs.setdefault('start', self.frame)  
         kwargs.setdefault('step', self.skip_timestep)
         try:
             kwargs.setdefault('delta', self.dt)
@@ -965,12 +968,6 @@ class ChainReader(Reader):
     def frame(self):
         """Cumulative frame number of the current time step.
 
-        .. Note::
-
-           The frame number is 1-based, i.e. the first frame has frame number
-           1. However, frame indices (used for indexing and slicing with the
-           `trajectory[frame_index]` notation use a 0-based index, i.e. *frame*
-           - 1.
         """
         return self.ts.frame
 

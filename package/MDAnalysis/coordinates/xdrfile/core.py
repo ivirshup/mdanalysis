@@ -55,6 +55,9 @@ for the XTC and TRR format.
    stale. The offsets are automatically regenerated if they are stale or
    missing.
 
+.. versionchanged:: 0.11.0
+   Frames now 0-based instead of 1-based
+
 .. autoclass:: Timestep
    :members:
 .. autoclass:: TrjReader
@@ -701,7 +704,7 @@ class TrjReader(base.Reader):
         return self._Writer(filename, numatoms, **kwargs)
 
     def __iter__(self):
-        self.ts.frame = 0  # start at 0 so that the first frame becomes 1
+        self.ts.frame = -1  # start at -1 so that the first frame becomes 0
         self._reopen()
         while True:
             try:
@@ -725,14 +728,11 @@ class TrjReader(base.Reader):
     def _read_frame(self, frame):
         """ Fast, index-based, random frame access
 
-        :TODO: Should we treat frame as 0-based or 1-based??  Right
-               now: 0-based (which is inconsistent) but analogous to
-               DCDReader
         """
         if self._offsets is None:
             self._read_trj_numframes(self.filename)
         self._seek(self._offsets[frame])
-        self.ts.frame = frame  # frame gets +1'd in _read_next_timestep   
+        self.ts.frame = frame - 1 # frame gets +1'd in _read_next_timestep   
         self._read_next_timestep()
         return self.ts
 

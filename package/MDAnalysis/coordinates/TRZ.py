@@ -126,6 +126,9 @@ class TRZReader(base.Reader):
         iterate through a trajectory using slicing
       ``trz[i]``
         random access of a trajectory frame
+
+    .. versionchanged:: 0.11.0
+       Frames now 0-based instead of 1-based
     """
 
     format = "TRZ"
@@ -343,10 +346,14 @@ class TRZReader(base.Reader):
 
     # can use base.Reader __getitem__ implementation
     def _read_frame(self, frame):
-        """Move to *frame* and fill timestep with data."""
-        move = frame - (self.ts.frame - 1)  # difference from current frame to desired frame
+        """Move to *frame* and fill timestep with data.
+        
+        .. versionchanged:: 0.11.0
+           Frames now 0-based instead of 1-based
+        """
+        move = frame - (self.ts.frame)  # difference from current frame to desired frame
         if move is not 0:
-            self._seek(move - 1)
+            self._seek(move)
             self.next()
         return self.ts
 
