@@ -469,12 +469,16 @@ class DCDReader(base.Reader):
         if ts is None:
             ts = self.ts
         ts.frame = self._read_next_frame(ts._x, ts._y, ts._z, ts._unitcell, self.skip)
+        # dcd.c gives 1 based, we want 0 based
+        ts.frame -= 1
         return ts
 
     def _read_frame(self, frame):
         self._jump_to_frame(frame)
         ts = self.ts
         ts.frame = self._read_next_frame(ts._x, ts._y, ts._z, ts._unitcell, 1)
+        # dcd.c gives 1 basead, we want 0 based
+        ts.frame -= 1
         return ts
 
     def timeseries(self, asel, start=0, stop=-1, skip=1, format='afc'):
