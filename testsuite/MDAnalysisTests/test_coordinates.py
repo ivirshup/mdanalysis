@@ -1558,34 +1558,34 @@ class TestDCDReaderClass(TestCase):
         except:
             raise AssertionError("with_statement not working for DCDReader")
         assert_equal(N, 98, err_msg="with_statement: DCDReader reads wrong number of frames")
-        assert_array_equal(frames, np.arange(1, N + 1), err_msg="with_statement: DCDReader does not read all frames")
+        assert_array_equal(frames, np.arange(0, N), err_msg="with_statement: DCDReader does not read all frames")
 
 
 class TestDCDReader(_TestDCD):
     def test_rewind_dcd(self):
         self.dcd.rewind()
-        assert_equal(self.ts.frame, 1, "rewinding to frame 1")
+        assert_equal(self.ts.frame, 0, "rewinding to frame 0")
 
     def test_next_dcd(self):
         self.dcd.rewind()
         self.dcd.next()
-        assert_equal(self.ts.frame, 2, "loading frame 2")
+        assert_equal(self.ts.frame, 1, "loading frame 1")
 
     def test_jump_dcd(self):
-        self.dcd[15]  # index is 0-based but frames are 1-based
-        assert_equal(self.ts.frame, 16, "jumping to frame 16")
+        self.dcd[15]  # index is 0-based and frames are 0-based
+        assert_equal(self.ts.frame, 15, "jumping to frame 15")
 
     def test_jump_lastframe_dcd(self):
         self.dcd[-1]
-        assert_equal(self.ts.frame, 98, "indexing last frame with dcd[-1]")
+        assert_equal(self.ts.frame, 97, "indexing last frame with dcd[-1]")
 
     def test_slice_dcd(self):
         frames = [ts.frame for ts in self.dcd[5:17:3]]
-        assert_equal(frames, [6, 9, 12, 15], "slicing dcd [5:17:3]")
+        assert_equal(frames, [5, 8, 11, 14], "slicing dcd [5:17:3]")
 
     def test_reverse_dcd(self):
         frames = [ts.frame for ts in self.dcd[20:5:-1]]
-        assert_equal(frames, range(21, 6, -1), "reversing dcd [20:5:-1]")
+        assert_equal(frames, range(20, 5, -1), "reversing dcd [20:5:-1]")
 
     def test_numatoms(self):
         assert_equal(self.universe.trajectory.numatoms, 3341, "wrong number of atoms")
@@ -1605,12 +1605,12 @@ class TestDCDReader(_TestDCD):
                             err_msg="wrong total length of AdK trajectory")
 
     def test_frame(self):
-        self.dcd[15]  # index is 0-based but frames are 1-based
-        assert_equal(self.universe.trajectory.frame, 16, "wrong frame number")
+        self.dcd[15]  # index is 0-based and frames are 0-based
+        assert_equal(self.universe.trajectory.frame, 15, "wrong frame number")
 
     def test_time(self):
-        self.dcd[15]  # index is 0-based but frames are 1-based
-        assert_almost_equal(self.universe.trajectory.time, 16.0, 5,
+        self.dcd[15]  # index is 0-based and frames are 0-based
+        assert_almost_equal(self.universe.trajectory.time, 15.0, 5,
                             err_msg="wrong time of frame")
 
     def test_volume(self):
