@@ -591,8 +591,7 @@ class TestINPCRDReader(TestCase):
         self._check_ts(u.trajectory.ts)
 
     def test_universe_restrt(self):
-        u = MDAnalysis.Universe(XYZ_five, INPCRD, format='RESTRT')
-
+        u = MDAnalysis.Universe(XYZ_five, INPCRD, format='RESTRT') 
         self._check_ts(u.trajectory.ts)
 
 
