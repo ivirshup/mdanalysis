@@ -128,7 +128,7 @@ class MOL2Reader(base.Reader):
         else:
             # TODO: cleanup _read_frame() to use a "free" Timestep
             raise NotImplementedError("PrimitiveMOL2Reader cannot assign to a timestep")
-        frame = self.frame
+        frame = self.frame + 1
         return self._read_frame(frame)
 
     def _read_frame(self, frame):
@@ -160,22 +160,7 @@ class MOL2Reader(base.Reader):
 
 
 class MOL2Writer(base.Writer):
-    """MOL2Writer
-
-    Limitations
-    -----------
-
-    MOL2Writer can only be used to write out previously loaded MOL2 files. 
-    If you're trying to convert, for example, a PDB file to MOL you
-    should use other tools, like rdkit (http://www.rdkit.org/docs/GettingStartedInPython.html).
-
-    Here is an example how to use rdkit to convert a PDB to MOL::
-
-        from rdkit import Chem
-        mol = Chem.MolFromPDBFile("molecule.pdb", removeHs=False)
-        Chem.MolToMolFile(mol, "molecule.mol" )
-
-    MOL2 writer is currently not available for rdkit master. It requires 
+    """MOL2Writer Limitations ----------- MOL2Writer can only be used to write out previously loaded MOL2 files.  If you're trying to convert, for example, a PDB file to MOL you should use other tools, like rdkit (http://www.rdkit.org/docs/GettingStartedInPython.html).  Here is an example how to use rdkit to convert a PDB to MOL:: from rdkit import Chem mol = Chem.MolFromPDBFile("molecule.pdb", removeHs=False) Chem.MolToMolFile(mol, "molecule.mol" ) MOL2 writer is currently not available for rdkit master. It requires 
     SYBYL atomtype generation.
     See page 7 for list of SYBYL atomtypes (http://tripos.com/tripos_resources/fileroot/pdfs/mol2_format2.pdf).
 

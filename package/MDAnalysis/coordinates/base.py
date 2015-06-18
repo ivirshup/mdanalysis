@@ -166,7 +166,9 @@ class Timestep(object):
         .. versionchanged:: 0.11.0
            Added keywords for velocities and forces
         """
-        self.frame = 0
+        # readers call Reader._read_next_timestep() on init, incrementing
+        # self.frame to 0
+        self.frame = -1
         self._numatoms = numatoms
 
         self._pos = np.zeros((numatoms, 3), dtype=np.float32, order=self.order)
@@ -1035,7 +1037,7 @@ class ChainReader(Reader):
         self.active_reader[f]  # rely on reader to implement __getitem__()
         # update Timestep
         self.ts = self.active_reader.ts
-        self.ts.frame = frame + 1  # continuous frames, 1-based
+        self.ts.frame = frame  # continuous frames, 0-based
         return self.ts
 
     def _chained_iterator(self):
@@ -1043,7 +1045,7 @@ class ChainReader(Reader):
         self._rewind()  # must rewind all readers
         readers = itertools.chain(*self.readers)
         for frame, ts in enumerate(readers):
-            ts.frame = frame + 1  # fake continuous frames, 1-based
+            ts.frame = frame  # fake continuous frames, 0-based
             self.ts = ts
             # make sure that the active reader is in sync
             i, f = self._get_local_frame(frame)  # uses 0-based frames!

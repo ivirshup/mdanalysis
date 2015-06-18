@@ -521,7 +521,7 @@ class PrimitivePDBReader(base.Reader):
 
         # No 'MODEL' entries
         if len(frames) == 0:
-            frames[1] = 0
+            frames[0] = 0
 
         self.frames = frames
         self.numframes = len(frames) if frames else 1
@@ -552,9 +552,9 @@ class PrimitivePDBReader(base.Reader):
         self._read_frame(0)
 
     def _reopen(self):
-        # Pretend the current TS is 0 (in 1 based) so "next" is the
-        # first frame
-        self.ts.frame = 0
+        # Pretend the current TS is -1 (in 0 based) so "next" is the
+        # 0th frame
+        self.ts.frame = -1
 
     def _read_next_timestep(self, ts=None):
         if ts is None:
@@ -565,13 +565,10 @@ class PrimitivePDBReader(base.Reader):
         # frame is 1-based. Normally would add 1 to frame before calling
         # self._read_frame to retrieve the subsequent ts. But self._read_frame
         # assumes it is being passed a 0-based frame, and adjusts.
-        frame = self.frame
+        frame = self.frame + 1
         return self._read_frame(frame)
 
     def _read_frame(self, frame):
-        # Assume _read_frame is passed a 0-based frame number. Convert this to
-        # 1-based.
-        frame += 1
         try:
             line = self.frames[frame]
         except KeyError:

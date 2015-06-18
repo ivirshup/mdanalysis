@@ -631,7 +631,7 @@ class TrjReader(base.Reader):
         try:
             self.__getitem__(-1)
             # ensure we return to the frame we started with
-            self.__getitem__(frame - 1)
+            self.__getitem__(frame)
         except (IndexError, IOError):
             warnings.warn("Could not access last frame with loaded offsets;"
                           " will rebuild offsets instead.")
@@ -654,7 +654,7 @@ class TrjReader(base.Reader):
         # reset ts
         ts = self.ts
         ts.status = libxdrfile2.exdrOK
-        ts.frame = 0
+        ts.frame = -1 
         ts.step = 0
         ts.time = 0
         # additional data for XTC

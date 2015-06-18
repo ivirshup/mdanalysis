@@ -142,6 +142,7 @@ class GROReader(base.SingleFrameReader):
             if self.ts.has_velocities:
                 # converts nm/ps to A/ps units
                 self.convert_velocities_from_native(self.ts._velocities)
+
     def Writer(self, filename, **kwargs):
         """Returns a CRDWriter for *filename*.
 

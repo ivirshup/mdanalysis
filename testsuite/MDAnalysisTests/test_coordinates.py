@@ -146,7 +146,7 @@ class TestXYZReader(TestCase, Ref2r9r):
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
     def test_slice_raises_TypeError(self):
@@ -190,7 +190,7 @@ class TestCompressedXYZReader(TestCase, Ref2r9r):
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
     def test_slice_raises_TypeError(self):
@@ -340,9 +340,9 @@ class _TRJReaderTest(TestCase):
         assert_almost_equal(total, self.ref_sum_centre_of_geometry, self.prec,
                             err_msg="sum of centers of geometry over the trajectory do not match")
 
-    def test_initial_frame_is_1(self):
-        assert_equal(self.universe.trajectory.ts.frame, 1,
-                     "initial frame is not 1 but {0}".format(self.universe.trajectory.ts.frame))
+    def test_initial_frame_is_0(self):
+        assert_equal(self.universe.trajectory.ts.frame, 0,
+                     "initial frame is not 0 but {0}".format(self.universe.trajectory.ts.frame))
 
     def test_starts_with_first_frame(self):
         """Test that coordinate arrays are filled as soon as the trajectory has been opened."""
@@ -353,15 +353,15 @@ class _TRJReaderTest(TestCase):
         trj = self.universe.trajectory
         trj.next()
         trj.next()  # for readers that do not support indexing
-        assert_equal(trj.ts.frame, 3, "failed to forward to frame 3 (frameindex 2)")
+        assert_equal(trj.ts.frame, 2, "failed to forward to frame 2 (frameindex 2)")
         trj.rewind()
-        assert_equal(trj.ts.frame, 1, "failed to rewind to first frame")
+        assert_equal(trj.ts.frame, 0, "failed to rewind to first frame")
         assert_(np.any(self.universe.atoms.coordinates() > 0),
                 "Reader does not populate coordinates() after rewinding.")
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
 
@@ -401,7 +401,7 @@ class TestNCDFReader(_TRJReaderTest, RefVGV):
         self.prec = 3
 
     def test_slice_iteration(self):
-        frames = [ts.frame - 1 for ts in self.universe.trajectory[4:-2:4]]
+        frames = [ts.frame for ts in self.universe.trajectory[4:-2:4]]
         assert_equal(frames,
                      np.arange(self.universe.trajectory.numframes)[4:-2:4],
                      err_msg="slicing did not produce the expected frames")
@@ -696,12 +696,12 @@ class _SingleFrameReader(TestCase, RefAdKSmall):
         assert_equal(self.universe.trajectory.time, 0.0, "wrong time of the frame")
 
     def test_frame(self):
-        assert_equal(self.universe.trajectory.frame, 1,
-                     "wrong frame number (1-based, should be 1 for single frame readers)")
+        assert_equal(self.universe.trajectory.frame, 0,
+                     "wrong frame number (0-based, should be 0 for single frame readers)")
 
     def test_frame_index_0(self):
         self.universe.trajectory[0]
-        assert_equal(self.universe.trajectory.ts.frame, 1, "frame number for frame index 0 should be 1")
+        assert_equal(self.universe.trajectory.ts.frame, 0, "frame number for frame index 0 should be 0")
 
     def test_frame_index_1_raises_IndexError(self):
         def go_to_2(traj=self.universe.trajectory):
@@ -728,12 +728,12 @@ class _SingleFrameReader(TestCase, RefAdKSmall):
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
     def test_last_slice(self):
         trj_iter = self.universe.trajectory[-1:]  # should be same as above: only 1 frame!
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
 
@@ -967,9 +967,9 @@ class TestMultiPDBReader(TestCase):
     def test_rewind(self):
         u = self.multiverse
         u.trajectory[11]
-        assert_equal(u.trajectory.ts.frame, 12, "Failed to forward to 12th frame (frame index 11)")
+        assert_equal(u.trajectory.ts.frame, 11, "Failed to forward to 11th frame (frame index 11)")
         u.trajectory.rewind()
-        assert_equal(u.trajectory.ts.frame, 1, "Failed to rewind to first frame (frame index 0)")
+        assert_equal(u.trajectory.ts.frame, 0, "Failed to rewind to 0th frame (frame index 0)")
 
     @attr('slow')
     def test_iteration(self):
@@ -990,7 +990,7 @@ class TestMultiPDBReader(TestCase):
         u = self.multiverse
         frames = []
         for ts in u.trajectory[4:-2:4]:
-            frames.append(ts.frame - 1)
+            frames.append(ts.frame)
         assert_equal(np.array(frames),
                      np.arange(u.trajectory.numframes)[4:-2:4],
                      err_msg="slicing did not produce the expected frames")
@@ -1281,7 +1281,7 @@ class TestGROReader(TestCase, RefAdK):
         assert_equal(self.universe.trajectory.time, 0.0, "wrong time of the frame")
 
     def test_frame(self):
-        assert_equal(self.universe.trajectory.frame, 1, "wrong frame number (should be 1 for 1-based ts.frame)")
+        assert_equal(self.universe.trajectory.frame, 0, "wrong frame number (should be 0 for 0-based ts.frame)")
 
     def test_dt(self):
         """testing that accessing universe.trajectory.dt raises a KeyError for single frame readers"""
@@ -1316,7 +1316,7 @@ class TestGROReader(TestCase, RefAdK):
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
 
@@ -1491,7 +1491,7 @@ class TestPDBReaderBig(TestCase, RefAdK):
 
     @dec.slow
     def test_frame(self):
-        assert_equal(self.universe.trajectory.frame, 1, "wrong frame number")
+        assert_equal(self.universe.trajectory.frame, 0, "wrong frame number")
 
     @dec.slow
     def test_dt(self):
@@ -2003,7 +2003,7 @@ class TestChainReader(TestCase):
     def test_next_trajectory(self):
         self.trajectory.rewind()
         self.trajectory.next()
-        assert_equal(self.trajectory.ts.frame, 2, "loading frame 2")
+        assert_equal(self.trajectory.ts.frame, 1, "loading frame 2")
 
     def test_numatoms(self):
         assert_equal(self.universe.trajectory.numatoms, 3341, "wrong number of atoms")
@@ -2014,27 +2014,27 @@ class TestChainReader(TestCase):
     def test_iteration(self):
         for ts in self.trajectory:
             pass  # just forward to last frame
-        assert_equal(self.trajectory.numframes, ts.frame,
+        assert_equal(self.trajectory.numframes - 1, ts.frame,
                      "iteration yielded wrong number of frames (%d), should be %d"
                      % (ts.frame, self.trajectory.numframes))
 
     def test_jump_lastframe_trajectory(self):
         self.trajectory[-1]
         print self.trajectory.ts, self.trajectory.ts.frame
-        assert_equal(self.trajectory.ts.frame, self.trajectory.numframes, "indexing last frame with trajectory[-1]")
+        assert_equal(self.trajectory.ts.frame + 1, self.trajectory.numframes, "indexing last frame with trajectory[-1]")
 
     def test_slice_trajectory(self):
         frames = [ts.frame for ts in self.trajectory[5:17:3]]
-        assert_equal(frames, [6, 9, 12, 15], "slicing dcd [5:17:3]")
+        assert_equal(frames, [5, 8, 11, 14], "slicing dcd [5:17:3]")
 
     def test_full_slice(self):
         trj_iter = self.universe.trajectory[:]
-        frames = [ts.frame - 1 for ts in trj_iter]
+        frames = [ts.frame for ts in trj_iter]
         assert_equal(frames, np.arange(self.universe.trajectory.numframes))
 
     def test_frame_numbering(self):
-        self.trajectory[98]  # index is 0-based but frames are 1-based
-        assert_equal(self.universe.trajectory.frame, 99, "wrong frame number")
+        self.trajectory[98]  # index is 0-based and frames are 0-based
+        assert_equal(self.universe.trajectory.frame, 98, "wrong frame number")
 
     def test_frame(self):
         self.trajectory[0]
@@ -2157,33 +2157,33 @@ class _GromacsReader(TestCase):
     @dec.slow
     def test_rewind_xdrtrj(self):
         self.trajectory.rewind()
-        assert_equal(self.ts.frame, 1, "rewinding to frame 1")
+        assert_equal(self.ts.frame, 0, "rewinding to frame 1")
 
     @dec.slow
     def test_next_xdrtrj(self):
         self.trajectory.rewind()
         self.trajectory.next()
-        assert_equal(self.ts.frame, 2, "loading frame 2")
+        assert_equal(self.ts.frame, 1, "loading frame 1")
 
     @dec.slow
     def test_jump_xdrtrj(self):
-        self.trajectory[4]  # index is 0-based but frames are 1-based
-        assert_equal(self.ts.frame, 5, "jumping to frame 5")
+        self.trajectory[4]  # index is 0-based and frames are 0-based
+        assert_equal(self.ts.frame, 4, "jumping to frame 4")
 
     @dec.slow
     def test_jump_lastframe_xdrtrj(self):
         self.trajectory[-1]
-        assert_equal(self.ts.frame, 10, "indexing last frame with trajectory[-1]")
+        assert_equal(self.ts.frame, 9, "indexing last frame with trajectory[-1]")
 
     @dec.slow
     def test_slice_xdrtrj(self):
         frames = [ts.frame for ts in self.trajectory[2:9:3]]
-        assert_equal(frames, [3, 6, 9], "slicing xdrtrj [2:9:3]")
+        assert_equal(frames, [2, 5, 8], "slicing xdrtrj [2:9:3]")
 
     @dec.slow
     def test_reverse_xdrtrj(self):
         frames = [ts.frame for ts in self.trajectory[::-1]]
-        assert_equal(frames, range(10, 0, -1), "slicing xdrtrj [::-1]")
+        assert_equal(frames, range(9, -1, -1), "slicing xdrtrj [::-1]")
 
     @dec.slow
     def test_coordinates(self):
@@ -2195,7 +2195,7 @@ class _GromacsReader(TestCase):
         T.rewind()
         T.next()
         T.next()
-        assert_equal(self.ts.frame, 3, "failed to step to frame 3")
+        assert_equal(self.ts.frame, 2, "failed to step to frame 3")
         ca = U.selectAtoms('name CA and resid 122')
         # low precision match (2 decimals in A, 3 in nm) because the above are the trr coords
         assert_array_almost_equal(ca.coordinates(), ca_Angstrom, 2,
@@ -2232,13 +2232,13 @@ class _GromacsReader(TestCase):
 
     @dec.slow
     def test_frame(self):
-        self.trajectory[4]  # index is 0-based but frames are 1-based
-        assert_equal(self.universe.trajectory.frame, 5, "wrong frame number")
+        self.trajectory[4]  # index is 0-based and frames are 0-based
+        assert_equal(self.universe.trajectory.frame, 4, "wrong frame number")
 
     @dec.slow
     def test_time(self):
-        self.trajectory[4]  # index is 0-based but frames are 1-based
-        assert_almost_equal(self.universe.trajectory.time, 500.0, 5,
+        self.trajectory[4]
+        assert_almost_equal(self.universe.trajectory.time, 400.0, 5,
                             err_msg="wrong time of frame")
 
     @dec.slow
@@ -2289,7 +2289,7 @@ class TestXTCReaderClass(TestCase):
         except:
             raise AssertionError("with_statement not working for XTCReader")
         assert_equal(N, 10, err_msg="with_statement: XTCReader reads wrong number of frames")
-        assert_array_equal(frames, np.arange(1, N + 1), err_msg="with_statement: XTCReader does not read all frames")
+        assert_array_equal(frames, np.arange(0, N), err_msg="with_statement: XTCReader does not read all frames")
 
 
 class TestTRRReader(_GromacsReader):
@@ -2310,7 +2310,7 @@ class TestTRRReader(_GromacsReader):
         # velocities in the MDA base unit A/ps (needed for True)
         v_base = v_native * 10.0
         self.universe.trajectory.rewind()
-        assert_equal(self.ts.frame, 1, "failed to read frame 1")
+        assert_equal(self.ts.frame, 0, "failed to read frame 1")
 
         assert_array_almost_equal(self.universe.trajectory.ts._velocities[[47675, 47676]], v_base, self.prec,
                                   err_msg="ts._velocities for indices 47675,47676 do not match known values")
@@ -2548,7 +2548,7 @@ class _XDRNoConversion(TestCase):
         T.rewind()
         T.next()
         T.next()
-        assert_equal(self.ts.frame, 3, "failed to step to frame 3")
+        assert_equal(self.ts.frame, 2, "failed to step to frame 3")
         ca = U.selectAtoms('name CA and resid 122')
         # low precision match because we also look at the trr: only 3 decimals in nm in xtc!
         assert_array_almost_equal(ca.coordinates(), ca_nm, 3,
