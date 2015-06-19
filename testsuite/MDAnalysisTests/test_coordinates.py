@@ -2878,11 +2878,13 @@ class TestTRZReader(TestCase, RefTRZ):
         assert_equal(len(U.atoms), self.ref_numatoms, "load Universe from PSF and TRZ")
 
     def test_next_trz(self):
-        self.trz.rewind()
+        assert_equal(self.ts.frame, 0, "starts at first frame")
         self.trz.next()
-        assert_equal(self.ts.frame, 1, "loading frame 2")
+        assert_equal(self.ts.frame, 1, "next returns frame index 1")
 
     def test_rewind_trz(self):
+        # move to different frame and rewind to get first frame back
+        self.trz[2]
         self.trz.rewind()
         assert_equal(self.ts.frame, 0, "rewinding to frame 1")
 
@@ -2890,12 +2892,10 @@ class TestTRZReader(TestCase, RefTRZ):
         assert_equal(self.universe.trajectory.numframes, self.ref_numframes, "wrong number of frames in trz")
 
     def test_seeking(self):
-        self.trz.rewind()
-
         self.universe.trajectory[3]
         assert_equal(self.ts.frame, 3, "loading frame 3")
 
-        orig = self.universe.atoms[0:3].positions
+        orig = self.universe.atoms[0:3].positions.copy()
 
         self.universe.trajectory[4]
         assert_equal(self.ts.frame, 4, "loading frame 4")
@@ -2933,7 +2933,6 @@ class TestTRZReader(TestCase, RefTRZ):
         assert_almost_equal(self.trz.delta, newref, self.prec, "couldn't inject to delta")
 
     def test_time(self):
-        self.trz.rewind()
         assert_almost_equal(self.trz.time, self.ref_time, self.prec, "wrong time value in trz")
 
     def test_get_writer(self):
