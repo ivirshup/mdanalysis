@@ -159,6 +159,19 @@ class TestXYZReader(TestCase, Ref2r9r):
         #frames = [ts.frame-1 for ts in trj_iter()]
         #assert_equal(frames, np.arange(self.universe.trajectory.numframes, step=2))
 
+    def test_rewind(self):
+        self.universe.trajectory.rewind()
+        assert_equal(self.universe.trajectory.ts.frame, 0, "rewinding to frame 0")
+
+    def test_next(self):
+        self.universe.trajectory.rewind()
+        self.universe.trajectory.next()
+        assert_equal(self.universe.trajectory.ts.frame, 1, "loading frame 1")
+
+    def test_dt(self):
+        assert_almost_equal(self.universe.trajectory.dt, 1.0, 4,
+                            err_msg="wrong timestep dt")
+
 
 class TestCompressedXYZReader(TestCase, Ref2r9r):
     def setUp(self):
@@ -198,6 +211,19 @@ class TestCompressedXYZReader(TestCase, Ref2r9r):
             return list(self.universe.trajectory[::2])
 
         assert_raises(TypeError, trj_iter)
+
+    def test_rewind(self):
+        self.universe.trajectory.rewind()
+        assert_equal(self.universe.trajectory.ts.frame, 0, "rewinding to frame 0")
+
+    def test_next(self):
+        self.universe.trajectory.rewind()
+        self.universe.trajectory.next()
+        assert_equal(self.universe.trajectory.ts.frame, 1, "loading frame 1")
+
+    def test_dt(self):
+        assert_almost_equal(self.universe.trajectory.dt, 1.0, 4,
+                            err_msg="wrong timestep dt")
 
 
 class TestXYZWriter(TestCase, Ref2r9r):

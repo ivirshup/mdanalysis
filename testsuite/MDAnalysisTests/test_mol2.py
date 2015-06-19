@@ -108,7 +108,3 @@ class TestMol2_traj(TestCase):
     def test_numframes(self):
         assert_equal(self.universe.trajectory.numframes, 200, "wrong number of frames in traj")
 
-    def test_frame(self):
-        self.traj[15]  # index is 0-based and frames are 0-based
-        assert_equal(self.universe.trajectory.frame, 15, "wrong frame number")
-
