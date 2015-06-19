@@ -405,7 +405,7 @@ class TRZReader(base.Reader):
         #Reset ts
         ts = self.ts
         ts.status = 1
-        ts.frame = 0
+        ts.frame = -1 
         ts.step = 0
         ts.time = 0
         return self.trzfile

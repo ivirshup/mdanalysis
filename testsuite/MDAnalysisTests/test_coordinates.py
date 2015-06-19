@@ -2854,11 +2854,11 @@ class TestTRZReader(TestCase, RefTRZ):
     def test_next_trz(self):
         self.trz.rewind()
         self.trz.next()
-        assert_equal(self.ts.frame, 2, "loading frame 2")
+        assert_equal(self.ts.frame, 1, "loading frame 2")
 
     def test_rewind_trz(self):
         self.trz.rewind()
-        assert_equal(self.ts.frame, 1, "rewinding to frame 1")
+        assert_equal(self.ts.frame, 0, "rewinding to frame 1")
 
     def test_numframes(self):
         assert_equal(self.universe.trajectory.numframes, self.ref_numframes, "wrong number of frames in trz")
@@ -2867,15 +2867,18 @@ class TestTRZReader(TestCase, RefTRZ):
         self.trz.rewind()
 
         self.universe.trajectory[3]
+        assert_equal(self.ts.frame, 3, "loading frame 3")
 
         orig = self.universe.atoms[0:3].positions
 
         self.universe.trajectory[4]
+        assert_equal(self.ts.frame, 4, "loading frame 4")
         self.universe.trajectory[3]
 
         assert_almost_equal(self.universe.atoms[0:3].positions, orig, self.prec)
 
         self.universe.trajectory[0]
+        assert_equal(self.ts.frame, 0, "loading frame 0")
         self.universe.trajectory[3]
 
         assert_almost_equal(self.universe.atoms[0:3].positions, orig, self.prec)
