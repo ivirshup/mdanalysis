@@ -49,6 +49,8 @@ class MOL2Reader(base.Reader):
 
     .. versionchanged:: 0.11.0
        Frames now 0-based instead of 1-based
+       MOL2 now resuses the same Timestep object for every frame
+       previously created a new instance of Timestep each frame
     """
     format = 'MOL2'
     units = {'time': None, 'length': 'Angstrom'}
@@ -132,9 +134,6 @@ class MOL2Reader(base.Reader):
         return self._read_frame(frame)
 
     def _read_frame(self, frame):
-        if np.dtype(type(frame)) != np.dtype(int):
-            raise TypeError("frame must be a integer")
-
         unitcell = np.zeros(6, dtype=np.float32)
         block = self.frames[frame]
 
@@ -150,13 +149,18 @@ class MOL2Reader(base.Reader):
                 "frame has %d, the next frame has %d atoms" % (
                 len(self.ts._pos), len(coords)))
 
-        self.ts = self._Timestep.from_coordinates(np.array(coords, dtype=np.float32))
+        self.ts.positions = np.array(coords, dtype=np.float32)
         self.ts._unitcell[:] = unitcell
         if self.convert_units:
             self.convert_pos_from_native(self.ts._pos)  # in-place !
             self.convert_pos_from_native(self.ts._unitcell[:3])  # in-place ! (only lengths)
         self.ts.frame = frame
         return self.ts
+
+    def _reopen(self):
+        # Make frame think it's before start, so calling next
+        # reads first frame
+        self.ts.frame = -1
 
 
 class MOL2Writer(base.Writer):
