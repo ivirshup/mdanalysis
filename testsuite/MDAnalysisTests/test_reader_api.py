@@ -101,13 +101,13 @@ class _TestReader(TestCase):
         ret = self.reader.rewind()
 
         assert_equal(ret, None)
-        assert_equal(self.reader.ts.frame, 1)
+        assert_equal(self.reader.ts.frame, 0)
 
     def test_context(self):
         with self.readerclass('text.txt') as sfr:
             l = sfr.ts.frame
 
-        assert_equal(l, 1)
+        assert_equal(l, 0)
 
     def test_len(self):
         l = len(self.reader)
