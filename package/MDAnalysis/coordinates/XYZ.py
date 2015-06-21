@@ -266,6 +266,7 @@ class XYZReader(base.Reader):
         self.skip_timestep = 1
 
         self.ts = self._Timestep(self.numatoms)  # numatoms has sideeffects: read trajectory... (FRAGILE)
+        self.ts.frame = -1
 
         # Read in the first timestep (FRAGILE);
         # FIXME: Positions on frame 0 (whatever that means) instead of 1 (as all other readers do).
@@ -305,14 +306,13 @@ class XYZReader(base.Reader):
             return self._numframes
 
     def _read_xyz_numframes(self, filename):
-        self._reopen()
         # the number of lines in the XYZ file will be 2 greater than the number of atoms
         linesPerFrame = self.numatoms + 2
         counter = 0
         # step through the file (assuming xyzfile has an iterator)
-        for i in self.xyzfile:
-            counter = counter + 1
-        self.close()
+        with util.anyopen(self.filename, 'r') as f:
+            for i in f:
+                counter = counter + 1
 
         # need to check this is an integer!
         numframes = int(counter / linesPerFrame)
