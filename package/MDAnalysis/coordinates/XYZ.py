@@ -310,9 +310,10 @@ class XYZReader(base.Reader):
         linesPerFrame = self.numatoms + 2
         counter = 0
         # step through the file (assuming xyzfile has an iterator)
-        with util.anyopen(self.filename, 'r') as f:
-            for i in f:
-                counter = counter + 1
+        f = util.anyopen(self.filename, 'r')
+        for i in f:
+            counter = counter + 1
+        f.close()
 
         # need to check this is an integer!
         numframes = int(counter / linesPerFrame)
